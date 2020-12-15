@@ -5,7 +5,7 @@ library(xml2)
 install.packages("xml12")
 library(rvest)
 
-##
+## 
 
 reddit_webpg <- read_html("https://www.reddit.com/r/politics/comments/a1j9xs/partisan_election_officials_are_inherently_unfair/")
 reddit_webpg %>% 
@@ -16,18 +16,20 @@ reddit_webpg %>%
   html_nodes("p._1qeIAgB0cPwnLhDF9XSiJM") %>% 
   html_text()
 
+## reading the data from reddit politics - collecting leading headlines along with time
 reddit_politics_new_webpg <- read_html("https://www.reddit.com/r/politics/new/")
 
-time_tag$time <- data.frame (reddit_politics_new_webpg %>% 
+time <- data.frame (reddit_politics_new_webpg %>% 
   html_nodes("a._3jOxDPIQ0KaOWpzvSQo-1s") %>% 
   html_text())
-time_tag$url <- reddit_politics_new_webpg %>% 
+url <- reddit_politics_new_webpg %>% 
   html_nodes("a._3jOxDPIQ0KaOWpzvSQo-1s") %>% 
   html_attr("href")
 
+time_tag <- data.frame(time, url)
 names(time_tag) <- c("Time", "URL")
 
-
+##creating a 2 dimensional table to store the comments by mapping it to headline ###
 titles <- c()
 comments <- c()
 
@@ -49,6 +51,8 @@ for (i in 1:dim(time_tag)[1]) {
 
 reddit_data <- data.frame(Headline = titles, Comments = comments)
 
+
+##################################removing disclaimer comments ############################
 disclaimer <- c("As a reminder, this subreddit is for civil discussion.", 
 "In general, be courteous to others. Debate/discuss/argue the merits of ideas, don't attack people. Personal insults, shill or troll accusations, hate speech, any advocating or wishing death/physical harm, and other rule violations can result in a permanent ban.",
 "If you see comments in violation of our rules, please report them.", 
@@ -60,8 +64,17 @@ for (i in 1:dim(reddit_data)[1]){
   }
 }
 
+## using subset function
+reddit_data <- subset(reddit_data, !(Comments %in% c(disclaimer)))
 
+############################# sentiment r using keyword #####################
 
+install.packages("sentimentr")
+library(sentimentr)
+
+sentiment_data <- sentiment(reddit_data$Comments)
+emotion_data <- emotion(reddit_data$Comments)
+summary(sentiment_data)
 ###############################rough work##############################
 reddit <- reddit_data
 reddit[,2]

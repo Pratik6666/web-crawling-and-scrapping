@@ -1,0 +1,27 @@
+library(xml12)
+library(rvest)
+
+--> use the following for reading the html file into your vector/variable
+reddit_webpg <- read_html("https://www.reddit.com/r/politics/comments/a1j9xs/partisan_election_officials_are_inherently_unfair/")
+reddit_webpg %>% 
+  html_node("title") %>% 
+  html_text()
+
+--> use html_text or html_abbr to copy data from classes
+reddit_webpg %>% 
+  html_nodes("p._1qeIAgB0cPwnLhDF9XSiJM") %>%  --> here 'p.' represents a paragraph. look for it in html tags and post that class
+  html_text()
+
+
+--> if you want to filter with attributes 
+url <- reddit_politics_new_webpg %>% 
+  html_nodes("a._3jOxDPIQ0KaOWpzvSQo-1s") %>%  --> here 'a.' represents the tag.. again look for it inside the tag and post that use class
+  html_attr("href")
+
+--> save in data frame
+--> use subset to remove disclaimer lines --- here 'Comments' is the column of data frame housing the comments
+reddit_data <- subset(reddit_data, !(Comments %in% c(disclaimer))) --> disclaimer is storing the reddit disclaimer lines which are present in all sub reddits
+
+
+--> use sentimentr package to understand the tone of the sentences/comments 
+library(sentimentr)
